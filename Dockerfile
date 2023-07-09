@@ -2,11 +2,15 @@ FROM dyalog/dyalog:latest
 
 WORKDIR /app
 
-# Install necessary dependencies
+# Switch to root to install necessary dependencies
+USER root
 RUN apt-get update && apt-get install -y \
     unzip \
     wget \
     python3-pip
+
+# Switch back to original user
+USER dyalog
 
 # Install Jupyter Book
 RUN pip3 install jupyter-book
