@@ -22,7 +22,7 @@ jobs:
         
     - name: Copy built Jupyter Book from Docker container
       run: |
-        docker cp jupyterbook:/app/contents/_build ./_build
+        docker cp jupyterbook:/home/dyalog/contents/_build ./_build
         
     - name: Archive production artifacts
       uses: actions/upload-artifact@v2
