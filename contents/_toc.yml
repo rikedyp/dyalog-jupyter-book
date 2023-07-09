@@ -1,0 +1,5 @@
+format: jb-article
+root: Section0
+sections:
+- file: Section1
+- file: Section2
