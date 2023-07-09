@@ -1,6 +1,6 @@
 FROM dyalog/dyalog:latest
 
-WORKDIR /app
+WORKDIR /home/dyalog
 
 # Switch to root to install necessary dependencies
 USER root
@@ -10,24 +10,28 @@ RUN apt-get update && apt-get install -y \
     python3-pip \
     git
 
+# Install Jupyter notebook and Jupyter Book
+RUN pip3 install notebook jupyter-book
+
+# No "mapl" script in base install, which jupyter
+# kernel expects. Create symbolic link to fake it.
+RUN ln -s /opt/mdyalog/18.2/64/unicode/dyalog /opt/mdyalog/18.2/64/unicode/mapl
+
 # Switch back to original user
 USER dyalog
 
-# Install Jupyter Book
-RUN pip3 install jupyter-book
-
 # Clone the Dyalog Jupyter Kernel repository
-WORKDIR /app
 RUN git clone https://github.com/Dyalog/dyalog-jupyter-kernel.git
 
 # Go into the cloned directory and run the install script
-# WORKDIR /app/dyalog-jupyter-kernel
-# RUN chmod +x install.sh && ./install.sh
-RUN chmod +x /app/dyalog-jupyter-kernel/install.sh && /app/dyalog-jupyter-kernel/install.sh
+WORKDIR /home/dyalog/dyalog-jupyter-kernel
+RUN chmod +x install.sh && ./install.sh
 
-# Go back to /app directory
-# WORKDIR /app
+COPY . /home/dyalog
 
-COPY . /app
+# Change owner to dyalog
+USER root
+RUN chown -R dyalog:dyalog /home/dyalog
 
+USER dyalog
 CMD ["bash"]
