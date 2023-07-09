@@ -1,0 +1,31 @@
+name: Build Jupyter Book
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Check out code
+      uses: actions/checkout@v2
+
+    - name: Build Docker image
+      run: docker build . -t jupyterbook
+
+    - name: Run Docker container and build Jupyter Book
+      run: |
+        docker run --name jupyterbook jupyterbook /bin/bash -c "cd /app/contents && jupyter-book build ."
+        
+    - name: Copy built Jupyter Book from Docker container
+      run: |
+        docker cp jupyterbook:/app/contents/_build ./_build
+        
+    - name: Archive production artifacts
+      uses: actions/upload-artifact@v2
+      with:
+        name: built-book
+        path: ./_build
