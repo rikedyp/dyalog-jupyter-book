@@ -16,14 +16,18 @@ jobs:
     - name: Build Docker image
       run: docker build . -t jupyterbook
 
-    - name: Run Docker container and build Jupyter Book
+    - name: Run Docker container
       run: |
-        docker run --name jupyterbook jupyterbook /bin/bash -c "cd /app/contents && jupyter-book build ."
+        docker run -d --name jupyterbook jupyterbook tail -f /dev/null
         
+    - name: Build Jupyter Book in Docker container
+      run: |
+        docker exec jupyterbook /bin/bash -c "cd /home/dyalog/contents && jupyter-book build ."
+
     - name: Copy built Jupyter Book from Docker container
       run: |
         docker cp jupyterbook:/home/dyalog/contents/_build ./_build
-        
+     
     - name: Archive production artifacts
       uses: actions/upload-artifact@v2
       with:
