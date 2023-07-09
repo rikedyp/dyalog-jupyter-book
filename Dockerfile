@@ -10,8 +10,8 @@ RUN apt-get update && apt-get install -y \
     python3-pip \
     git
 
-# Switch back to original user (replace 'user' with the actual username)
-USER user
+# Switch back to original user
+USER dyalog
 
 # Install Jupyter Book
 RUN pip3 install jupyter-book
