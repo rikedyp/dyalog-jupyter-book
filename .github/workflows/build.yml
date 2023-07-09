@@ -33,3 +33,8 @@ jobs:
       with:
         name: built-book
         path: ./_build
+        
+    - name: Stop Docker container
+      run: |
+        docker stop jupyterbook
+
