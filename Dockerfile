@@ -17,14 +17,16 @@ USER dyalog
 RUN pip3 install jupyter-book
 
 # Clone the Dyalog Jupyter Kernel repository
+WORKDIR /app
 RUN git clone https://github.com/Dyalog/dyalog-jupyter-kernel.git
 
 # Go into the cloned directory and run the install script
-WORKDIR /app/dyalog-jupyter-kernel
-RUN chmod +x install.sh && ./install.sh
+# WORKDIR /app/dyalog-jupyter-kernel
+# RUN chmod +x install.sh && ./install.sh
+RUN chmod +x /app/dyalog-jupyter-kernel/install.sh && /app/dyalog-jupyter-kernel/install.sh
 
 # Go back to /app directory
-WORKDIR /app
+# WORKDIR /app
 
 COPY . /app
 
