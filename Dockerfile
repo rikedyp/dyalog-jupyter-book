@@ -1,37 +1,64 @@
-FROM dyalog/dyalog:latest
+# Start with the Debian base image
+#
+# 
+FROM debian:bookworm-slim
 
-WORKDIR /home/dyalog
+# Set up some environment variables
+ARG DYALOG_RELEASE=18.2
+ENV PYDEVD_DISABLE_FILE_VALIDATION=1
+ENV PYTHONOPTIMIZE=-Xfrozen_modules=off
+ENV LANG en_GB.UTF-8
+ENV LANGUAGE en_GB:UTF-8
+ENV LC_ALL en_GB.UTF-8
 
-# Switch to root to install necessary dependencies
-USER root
-RUN apt-get update && apt-get install -y \
+# Install necessary dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl \
     unzip \
     wget \
-    python3-pip \
-    git
+    python3-venv \
+    git \
+    libncurses5 \
+    locales \
+    && apt-get clean && rm -Rf /var/lib/apt/lists/*
 
-# Install Jupyter notebook and Jupyter Book
-RUN pip3 install notebook jupyter-book
+# Setup locales
+RUN sed -i -e 's/# en_GB.UTF-8 UTF-8/en_GB.UTF-8 UTF-8/' /etc/locale.gen && locale-gen
 
-# No "mapl" script in base install, which jupyter
-# kernel expects. Create symbolic link to fake it.
-RUN ln -s /opt/mdyalog/18.2/64/unicode/dyalog /opt/mdyalog/18.2/64/unicode/mapl
+# Download and install Dyalog. NOTE: the jupyter build process fails with 18.2, but works in 19.0
+# for currently unknown reasons.
+# RUN DEBFILE=`curl -o - -s https://www.dyalog.com/uploads/php/download.dyalog.com/download.php?file=docker.metafile | awk -v v="$DYALOG_RELEASE" '$0~v && /deb/ {print $3}'` && \
+#     curl -o /tmp/dyalog.deb ${DEBFILE} && \
+#     dpkg -i --ignore-depends=libtinfo5 /tmp/dyalog.deb
 
-# Switch back to original user
-USER dyalog
+RUN curl -o /tmp/dyalog.deb https://packages.dyalog.com/homebrew/dyalog-unicode_19.0.47454_amd64.deb && \
+    dpkg -i --ignore-depends=libtinfo5 /tmp/dyalog.deb
 
-# Clone the Dyalog Jupyter Kernel repository
-RUN git clone https://github.com/Dyalog/dyalog-jupyter-kernel.git
+# Create a Python virtual environment and install Jupyter Book in it
+RUN python3 -m venv /opt/venv && \
+    /opt/venv/bin/pip install notebook jupyter-book
 
-# Go into the cloned directory and run the install script
-WORKDIR /home/dyalog/dyalog-jupyter-kernel
-RUN chmod +x install.sh && ./install.sh
+# Add user
+RUN useradd -s /bin/bash -d /home/dyalog -m dyalog
 
-COPY . /home/dyalog
+# Define working directory
+WORKDIR /home/dyalog
 
-# Change owner to dyalog
+# Download the Dyalog Jupyter Kernel repository as a zip and unpack it, then install
 USER root
-RUN chown -R dyalog:dyalog /home/dyalog
+RUN wget https://github.com/Dyalog/dyalog-jupyter-kernel/archive/master.zip && \
+    unzip master.zip && \
+    PYVER="$(python3 --version | sed 's/.*\(3\.[0-9]*\).*/\1/')" && \
+    KERNELDIR="/opt/venv/share/jupyter/kernels" && \
+    SITEDIR="/opt/venv/lib/python$PYVER/site-packages" && \
+    mkdir -p "$KERNELDIR" && \
+    cp -r dyalog-jupyter-kernel-master/dyalog-kernel "$KERNELDIR"/ && \
+    mkdir -p "$SITEDIR" && \
+    cp -r dyalog-jupyter-kernel-master/dyalog_kernel "$SITEDIR"/
 
+# Change back to the user 'dyalog'
 USER dyalog
-CMD ["bash"]
+
+# Default command to build the Jupyter Book
+# CMD ["/opt/venv/bin/jupyter-book", "build", "--verbose", "1", "/home/dyalog/contents"]
+CMD ["/opt/venv/bin/jupyter-book", "build", "-q", "/home/dyalog/contents"]

@@ -46,3 +46,19 @@ Pop that into your browser.
 Commit your changes. If you want to publish on GHP, run something like
 
     % ghp-import -r github -n -p -f contents/_build/html
+
+## Using Docker
+
+There is an experimental `Dockerfile` provided which will build Jupyterbooks in a container. To build the container, use
+
+    docker build [--platform linux/amd64] -t dyjupy .
+
+If you're running this on an Apple Silicon-based Mac, you may need the bits in the brackets.
+
+To build your book, use
+
+    docker run [--platform linux/amd64] \
+        -v {YOUR/PATH}/contents:/home/dyalog/contents \
+        dyjupy 
+
+The rendered book will end up in `{YOUR/PATH}/contents/_build`. 

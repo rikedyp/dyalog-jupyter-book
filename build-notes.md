@@ -1,6 +1,6 @@
 # Build
 
-jupyter-book build contents
+jupyter-book build -q contents
 git add ....
 git commit -m '....'
 git push github main
