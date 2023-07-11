@@ -6,11 +6,20 @@ The book is self-documenting, that is the first bits detail how to install the b
 
 You content, in the form of jupyter notebooks, go in the `contents/` directory. The structure of the book is defined in the `contents/_toc.yml` file. Some config stuff is defined in the `contents/_config.yml` file. Modify that to suit your needs.
 
-Note that installing, and maintaining a sound Python environment is not for the faint of heart. The template itself says the following:
+To build using the included Docker image, try:
+```
+git clone git@github.com:xpqz/jupy.git
+cd jupy
+docker build -t dyjupy .
+docker run -v ./contents:/home/dyalog/contents dyjupy
+```
+(If you're running this on an Apple Silicon Mac, you may need `--platform linux/amd64` on the `docker` commands above).
 
-## Building
+The rendered book will end up in `./contents/_build`. If the build succeeded, open `./contents/_build/html/index.html`.
 
-You need a running, recent, sound Python installation, the `jupyter` and `jupyter-book` packages. Installing Python in a sustainable way is a bit of an artform. _Please_ don't use `conda`. Just... don't. You want [pyenv](https://github.com/pyenv/pyenv) which manages multiple Python versions.
+## Building without Docker
+
+You need a running, recent, sound Python installation, the `jupyter` and `jupyter-book` packages. Installing Python in a sustainable way is a bit of an artform. [pyenv](https://github.com/pyenv/pyenv) is a great tool to manage Python versions.
 
 Use `pyenv` to install a recent version of Python, e.g 
 
@@ -31,8 +40,6 @@ If you intend to publish your book on GitHub Pages, you also need
 
     % pip install ghp-import
     
-Note: you didn't go `conda` because of something you read on the internet, did you? Good. You'll thank me later.
-
 If all that went to plan, you should now be able to build your jupyter-book using the command 
 
     % jupyter-book build contents
@@ -47,9 +54,6 @@ Commit your changes. If you want to publish on GHP, run something like
 
     % ghp-import -r github -n -p -f contents/_build/html
 
-## Using Docker
-
-There is an experimental `Dockerfile` provided which will build Jupyterbooks in a container. To build the container, use
 
     docker build [--platform linux/amd64] -t dyjupy .
 
