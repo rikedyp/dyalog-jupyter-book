@@ -1,8 +1,8 @@
 # Dyalog Jupyterbook Template
 
-This repository is a functioning, but largely empty, Jupyterbook set up for Dyalog APL. Fork it to get a headstart if you want to make a Dyalog Jupyterbook. It includes a suitable font, and some CSS bits that should make APL look good.
+This repository is a functioning, but largely empty, Jupyterbook set up for Dyalog APL. Fork it to get a head start if you want to make a Dyalog Jupyterbook. It includes a suitable font, and some CSS bits that should make APL look good.
 
-The book is self-documenting, that is the first bits detail how to install the bits needed and how to build. You can view the rendered book template [here](http://devtweb.dyalog.bramley/stefan/jupyterbook-template).
+The book is self-documenting, that is the first bits detail how to install the bits needed and how to build. 
 
 You content, in the form of jupyter notebooks, go in the `contents/` directory. The structure of the book is defined in the `contents/_toc.yml` file. Some config stuff is defined in the `contents/_config.yml` file. Modify that to suit your needs.
 
@@ -10,12 +10,18 @@ To build using the included Docker image, try:
 ```
 git clone git@github.com:xpqz/jupy.git
 cd jupy
-docker build -t dyjupy .
-docker run -v ./contents:/home/dyalog/contents dyjupy
+docker build -t dyalog-jupyter [--platform linux/amd64] .
+docker run -v ./contents:/home/dyalog/contents dyalog-jupyter
 ```
 (If you're running this on an Apple Silicon Mac, you may need `--platform linux/amd64` on the `docker` commands above).
 
 The rendered book will end up in `./contents/_build`. If the build succeeded, open `./contents/_build/html/index.html`.
+
+You can also use the container to create notebooks interactively:
+
+```
+docker run -p 8888:8888 -p 4502:4502 -v $(pwd):/workspace dyalog-jupyter
+```
 
 ## Building without Docker
 
