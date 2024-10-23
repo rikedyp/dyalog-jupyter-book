@@ -1,0 +1,17 @@
+# Force all text files to use LF line endings
+* text eol=lf
+
+# Handle common file types that should always use binary format and not be normalized
+*.jpg binary
+*.png binary
+*.gif binary
+*.pdf binary
+*.zip binary
+*.exe binary
+*.dll binary
+
+# Additional file types that should not be converted to text
+*.mov binary
+*.mp4 binary
+*.avi binary
+*.mp3 binary
