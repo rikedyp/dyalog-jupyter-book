@@ -14,27 +14,22 @@ jobs:
       uses: actions/checkout@v2
 
     - name: Build Docker image
-      run: docker build . -t jupyterbook
+      run: docker build . -t dyalog-jupyter
 
-    - name: Run Docker container
+    - name: Build Jupyter Book
       run: |
-        docker run -d --name jupyterbook jupyterbook tail -f /dev/null
+        # No need to start container separately since we have an entrypoint
+        docker run -v $(pwd):/home/dyalog/contents dyalog-jupyter
         
-    - name: Build Jupyter Book in Docker container
-      run: |
-        docker exec jupyterbook /bin/bash -c "cd /home/dyalog/contents && jupyter-book build ."
-
-    - name: Copy built Jupyter Book from Docker container
-      run: |
-        docker cp jupyterbook:/home/dyalog/contents/_build ./_build
-     
-    - name: Archive production artifacts
+    - name: Upload HTML Book
       uses: actions/upload-artifact@v2
       with:
-        name: built-book
-        path: ./_build
+        name: book-html
+        path: _build/html
         
-    - name: Stop Docker container
-      run: |
-        docker stop jupyterbook
-
+    - name: Deploy to GitHub Pages
+      if: success() # Only deploy if build succeeds
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: _build/html
